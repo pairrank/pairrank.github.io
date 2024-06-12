@@ -10,30 +10,36 @@
             text-align: center;
             margin: 0;
             padding: 20px;
-            background-color: #222; /* Darker overall background */
+            background-color: #111; /* Darker background */
             color: #fff;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
         }
 
         h1 {
-            font-size: 48px; /* Bigger PairRank text */
+            font-size: 80px; /* Larger PairRank text */
             margin-bottom: 30px;
         }
 
         .item-container {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
         .item {
-            margin: 10px;
-            width: 150px;
-            height: 150px;
+            margin: 20px;
+            width: 200px; /* Much bigger items */
+            height: 200px;
             border-radius: 15px;
             border: 1px solid #555;
             background-color: #444;
-            cursor: pointer; /* Make items clickable */
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px; /* Larger text inside items */
         }
 
         .item img {
@@ -43,9 +49,9 @@
         }
 
         button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
+            margin: 20px;
+            padding: 15px 30px;
+            font-size: 18px;
             border-radius: 5px;
             border: none;
             background-color: #555;
@@ -57,22 +63,12 @@
             background-color: #777;
         }
 
-        #results-section button {
-            margin-top: 20px;
-        }
-
-        #counter {
-            margin-top: 20px;
-            font-size: 20px;
-            color: #ccc;
-        }
-
         .popup {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(50, 50, 50, 0.95); /* Opaque dark background */
             padding: 20px;
             border-radius: 10px;
             z-index: 1000;
@@ -81,15 +77,31 @@
 
         .popup-content {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
         }
 
-        .popup input[type="text"], .popup input[type="file"] {
+        .popup input[type="text"] {
             padding: 10px;
             margin: 10px;
             border-radius: 5px;
             border: none;
+            background-color: #fff; /* White text input */
+            color: #333;
+            width: 250px;
+            text-align: center;
+        }
+
+        .popup input[type="file"] {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #777; /* Grey out image input */
+            color: #fff;
+            width: 250px;
+            text-align: center;
+            cursor: not-allowed;
         }
 
         .popup button {
@@ -104,23 +116,73 @@
         .popup button:hover {
             background-color: #777;
         }
+
+        .comparison-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .comparison-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .comparison-item {
+            margin: 20px;
+            width: 250px;
+            height: 250px;
+            border-radius: 15px;
+            border: 1px solid #555;
+            background-color: #444;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px; /* Larger text in comparison items */
+        }
+
+        #results-page {
+            display: none;
+        }
+
+        #back-btn {
+            margin-top: 20px;
+            padding: 15px 30px;
+        }
     </style>
 </head>
 <body>
-    <h1>PairRank</h1>
-    <div id="item-container"></div>
-    <div class="item-container">
-        <button id="add-item-btn">+</button>
+    <div id="item-add-page">
+        <h1>PairRank</h1>
+        <div class="item-container" id="item-container"></div>
+        <button id="add-item-btn">Add Item</button>
+        <button id="start-btn" style="display: none;">Start Comparisons</button>
     </div>
-    <div id="comparison-section" style="display:none;">
-        <div id="item1" class="item"></div>
-        <div id="item2" class="item"></div>
+
+    <div id="comparison-page" style="display: none;">
+        <h1>PairRank</h1>
+        <div class="comparison-container">
+            <div class="comparison-section">
+                <div id="item1" class="comparison-item"></div>
+                <div id="item2" class="comparison-item"></div>
+            </div>
+            <div id="counter"></div>
+        </div>
     </div>
-    <div id="results-section" style="display:none;">
-        <h2>Results</h2>
-        <ul id="results-list"></ul>
-        <button id="back-btn">Back to Main Page</button>
+
+    <div id="results-page" style="display: none;">
+        <h1>PairRank Results</h1>
+        <div id="results-section">
+            <h2>Results</h2>
+            <ul id="results-list"></ul>
+            <button id="back-btn">Back to Main Page</button>
+        </div>
     </div>
+
     <div class="popup" id="popup">
         <div class="popup-content">
             <input type="text" id="item-name" placeholder="Item name">
@@ -128,7 +190,7 @@
             <button id="add-popup-btn">Add</button>
         </div>
     </div>
-    <div id="counter"></div>
+
     <script>
         let items = [];
         let comparisons = [];
@@ -136,34 +198,85 @@
         let currentComparisonIndex = 0;
 
         const itemContainer = document.getElementById('item-container');
-        const comparisonSection = document.getElementById('comparison-section');
-        const resultsSection = document.getElementById('results-section');
+        const comparisonContainer = document.querySelector('.comparison-container');
+        const resultsList = document.getElementById('results-list');
         const counter = document.getElementById('counter');
+        const addItemBtn = document.getElementById('add-item-btn');
+        const startBtn = document.getElementById('start-btn');
+        const backBtn = document.getElementById('back-btn');
         const popup = document.getElementById('popup');
         const addPopupBtn = document.getElementById('add-popup-btn');
+        const itemNameInput = document.getElementById('item-name');
+        const itemImageInput = document.getElementById('item-image');
 
-        document.getElementById('add-item-btn').addEventListener('click', () => {
-            popup.style.display = 'block';
+        // Darken the background
+        document.body.style.backgroundColor = '#111';
+
+        // Make PairRank text bigger
+        document.querySelector('h1').style.fontSize = '80px';
+
+        // Clicking outside the popup should close it
+        window.addEventListener('click', (event) => {
+            if (event.target !== addItemBtn && !popup.contains(event.target)) {
+                popup.style.display = 'none';
+                itemNameInput.value = ''; // Clear text input
+                itemImageInput.value = ''; // Clear file input
+                toggleInputOptions(); // Reset input options
+            }
         });
 
-        addPopupBtn.addEventListener('click', addItem);
 
-        function addItem() {
-            const itemName = document.getElementById('item-name').value.trim();
-            const itemImage = document.getElementById('item-image').files[0];
+
+        // Add item button functionality
+        addItemBtn.addEventListener('click', () => {
+            popup.style.display = 'block';
+            toggleInputOptions(); // Initialize input options
+        });
+
+        // Toggle input options based on text or image selection
+        function toggleInputOptions() {
+            if (itemNameInput.value.trim()) {
+                itemImageInput.disabled = true;
+                itemImageInput.style.backgroundColor = '#777';
+            } else if (itemImageInput.files.length > 0) {
+                itemNameInput.disabled = true;
+                itemNameInput.style.backgroundColor = '#777';
+            } else {
+                itemImageInput.disabled = false;
+                itemImageInput.style.backgroundColor = '#777';
+                itemNameInput.disabled = false;
+                itemNameInput.style.backgroundColor = '#fff';
+            }
+        }
+
+        // Add item from popup
+        addPopupBtn.addEventListener('click', () => {
+            const itemName = itemNameInput.value.trim();
+            const itemImage = itemImageInput.files[0];
 
             if (!itemName && !itemImage) {
+                popup.style.display = 'none';
                 return;
             }
 
             items.push({ name: itemName, image: itemImage });
             renderItems();
-            popup.style.display = 'none';
-        }
 
+            // Show start button after adding 3 or more items
+            if (items.length >= 3) {
+                startBtn.style.display = 'inline-block';
+            }
+
+            popup.style.display = 'none';
+            itemNameInput.value = ''; // Clear text input
+            itemImageInput.value = ''; // Clear file input
+            toggleInputOptions(); // Reset input options
+        });
+
+        // Render items function
         function renderItems() {
             itemContainer.innerHTML = '';
-            items.forEach(item => {
+            items.forEach((item, index) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.classList.add('item');
                 itemDiv.onclick = () => selectItem(item);
@@ -173,6 +286,8 @@
                 } else if (item.image) {
                     const img = document.createElement('img');
                     img.src = URL.createObjectURL(item.image);
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '100%';
                     itemDiv.appendChild(img);
                 }
 
@@ -180,24 +295,16 @@
             });
         }
 
-        function selectItem(item) {
-            if (comparisons.length === 0) {
-                comparisons = generateComparisons(items);
-                showComparison();
-            } else {
-                const currentComparison = comparisons[currentComparisonIndex];
-                const index = currentComparison.indexOf(item);
-                const otherItem = currentComparison[1 - index];
-                scores[otherItem.name] += 1;
-                currentComparisonIndex++;
-                if (currentComparisonIndex >= comparisons.length) {
-                    showResults();
-                } else {
-                    showComparison();
-                }
-            }
-        }
+        // Start comparisons button functionality
+        startBtn.addEventListener('click', () => {
+            comparisons = generateComparisons(items);
+            currentComparisonIndex = 0;
+            renderComparison();
+            document.getElementById('item-add-page').style.display = 'none';
+            document.getElementById('comparison-page').style.display = 'block';
+        });
 
+        // Generate comparisons function
         function generateComparisons(items) {
             let pairs = [];
             for (let i = 0; i < items.length; i++) {
@@ -208,24 +315,22 @@
             return pairs.sort(() => Math.random() - 0.5);
         }
 
-        function showComparison() {
+        // Render comparison function
+        function renderComparison() {
             const [item1, item2] = comparisons[currentComparisonIndex];
-            renderComparison(item1, item2);
-            updateCounter();
-        }
-
-        function renderComparison(item1, item2) {
-            comparisonSection.style.display = 'flex';
             const item1Div = document.getElementById('item1');
             const item2Div = document.getElementById('item2');
-            item1Div.innerHTML = '';
-            item2Div.innerHTML = '';
+
+            item1Div.innerHTML = ''; // Clear previous content
+            item2Div.innerHTML = ''; // Clear previous content
 
             if (item1.name) {
                 item1Div.innerText = item1.name;
             } else if (item1.image) {
                 const img1 = document.createElement('img');
                 img1.src = URL.createObjectURL(item1.image);
+                img1.style.maxWidth = '100%';
+                img1.style.maxHeight = '100%';
                 item1Div.appendChild(img1);
             }
 
@@ -234,30 +339,64 @@
             } else if (item2.image) {
                 const img2 = document.createElement('img');
                 img2.src = URL.createObjectURL(item2.image);
+                img2.style.maxWidth = '100%';
+                img2.style.maxHeight = '100%';
                 item2Div.appendChild(img2);
+            }
+
+            // Update counter with current comparison index
+            counter.innerText = `${currentComparisonIndex + 1}/${comparisons.length}`;
+        }
+
+        // Select item function
+        function selectItem(item) {
+            const currentComparison = comparisons[currentComparisonIndex];
+            const index = currentComparison.indexOf(item);
+            const otherItem = currentComparison[1 - index];
+
+            // Increment score for the chosen item
+            scores[item.name] = (scores[item.name] || 0) + 1;
+
+            currentComparisonIndex++;
+
+            // Check if all comparisons are done, then show results
+            if (currentComparisonIndex >= comparisons.length) {
+                showResults();
+            } else {
+                renderComparison();
             }
         }
 
-        function updateCounter() {
-            counter.innerText = `Comparisons left: ${comparisons.length - currentComparisonIndex}`;
-        }
-
+        // Show results function
         function showResults() {
-            comparisonSection.style.display = 'none';
-            resultsSection.style.display = 'block';
-            const resultsList = document.getElementById('results-list');
+            document.getElementById('comparison-page').style.display = 'none';
+            document.getElementById('results-page').style.display = 'block';
+
+            // Clear previous results
             resultsList.innerHTML = '';
-            Object.keys(scores).sort((a, b) => scores[b] - scores[a]).forEach(item => {
+
+            // Sort items based on scores
+            const sortedItems = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+
+            // Display results in a list
+            sortedItems.forEach(item => {
                 const li = document.createElement('li');
                 li.innerText = `${item}: ${scores[item]} points`;
                 resultsList.appendChild(li);
             });
         }
 
-        document.getElementById('back-btn').addEventListener('click', () => {
-            comparisonSection.style.display = 'none';
-            resultsSection.style.display = 'none';
-            itemContainer.style.display = 'flex';
+        // Back to main page button in results
+        backBtn.addEventListener('click', () => {
+            // Reset everything and go back to main item adding page
+            items = [];
+            comparisons = [];
+            scores = {};
+            currentComparisonIndex = 0;
+            renderItems();
+            startBtn.style.display = 'none'; // Hide start button
+            document.getElementById('results-page').style.display = 'none';
+            document.getElementById('item-add-page').style.display = 'block';
         });
 
     </script>
