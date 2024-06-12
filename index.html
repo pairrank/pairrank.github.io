@@ -10,23 +10,36 @@
             text-align: center;
             margin: 0;
             padding: 20px;
-            background-color: #333;
+            background-color: #222; /* Darker overall background */
             color: #fff;
         }
 
         h1 {
-            font-size: 36px;
+            font-size: 48px; /* Bigger PairRank text */
             margin-bottom: 30px;
         }
 
+        .item-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
         .item {
-            margin: 20px;
-            display: inline-block;
-            width: 200px;
-            height: 200px;
+            margin: 10px;
+            width: 150px;
+            height: 150px;
             border-radius: 15px;
             border: 1px solid #555;
             background-color: #444;
+            cursor: pointer; /* Make items clickable */
+        }
+
+        .item img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 15px;
         }
 
         button {
@@ -37,73 +50,152 @@
             border: none;
             background-color: #555;
             color: #fff;
+            cursor: pointer;
         }
 
         button:hover {
             background-color: #777;
         }
 
-        #results-list {
-            list-style: none;
-            padding: 0;
+        #results-section button {
+            margin-top: 20px;
         }
 
-        #results-list li {
-            font-size: 18px;
-            margin-bottom: 10px;
+        #counter {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #ccc;
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .popup-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .popup input[type="text"], .popup input[type="file"] {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .popup button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #555;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .popup button:hover {
+            background-color: #777;
         }
     </style>
 </head>
 <body>
     <h1>PairRank</h1>
-    <div id="input-section">
-        <input type="number" id="item-count" placeholder="Number of items">
-        <button id="start-btn">Start</button>
+    <div id="item-container"></div>
+    <div class="item-container">
+        <button id="add-item-btn">+</button>
     </div>
     <div id="comparison-section" style="display:none;">
         <div id="item1" class="item"></div>
         <div id="item2" class="item"></div>
-        <button id="choose1">Choose Item 1</button>
-        <button id="choose2">Choose Item 2</button>
     </div>
     <div id="results-section" style="display:none;">
         <h2>Results</h2>
         <ul id="results-list"></ul>
+        <button id="back-btn">Back to Main Page</button>
     </div>
+    <div class="popup" id="popup">
+        <div class="popup-content">
+            <input type="text" id="item-name" placeholder="Item name">
+            <input type="file" id="item-image" accept="image/*">
+            <button id="add-popup-btn">Add</button>
+        </div>
+    </div>
+    <div id="counter"></div>
     <script>
-        document.getElementById('start-btn').addEventListener('click', startComparison);
-
         let items = [];
         let comparisons = [];
         let scores = {};
         let currentComparisonIndex = 0;
 
-        function startComparison() {
-            const itemCount = parseInt(document.getElementById('item-count').value);
-            if (isNaN(itemCount) || itemCount <= 0) {
-                alert('Please enter a valid number of items.');
+        const itemContainer = document.getElementById('item-container');
+        const comparisonSection = document.getElementById('comparison-section');
+        const resultsSection = document.getElementById('results-section');
+        const counter = document.getElementById('counter');
+        const popup = document.getElementById('popup');
+        const addPopupBtn = document.getElementById('add-popup-btn');
+
+        document.getElementById('add-item-btn').addEventListener('click', () => {
+            popup.style.display = 'block';
+        });
+
+        addPopupBtn.addEventListener('click', addItem);
+
+        function addItem() {
+            const itemName = document.getElementById('item-name').value.trim();
+            const itemImage = document.getElementById('item-image').files[0];
+
+            if (!itemName && !itemImage) {
                 return;
             }
 
-            items = [];
-            for (let i = 0; i < itemCount; i++) {
-                const itemName = prompt(`Enter name for item ${i + 1}:`);
-                if (itemName) {
-                    items.push(itemName);
-                    scores[itemName] = 0;
+            items.push({ name: itemName, image: itemImage });
+            renderItems();
+            popup.style.display = 'none';
+        }
+
+        function renderItems() {
+            itemContainer.innerHTML = '';
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('item');
+                itemDiv.onclick = () => selectItem(item);
+
+                if (item.name) {
+                    itemDiv.innerText = item.name;
+                } else if (item.image) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(item.image);
+                    itemDiv.appendChild(img);
+                }
+
+                itemContainer.appendChild(itemDiv);
+            });
+        }
+
+        function selectItem(item) {
+            if (comparisons.length === 0) {
+                comparisons = generateComparisons(items);
+                showComparison();
+            } else {
+                const currentComparison = comparisons[currentComparisonIndex];
+                const index = currentComparison.indexOf(item);
+                const otherItem = currentComparison[1 - index];
+                scores[otherItem.name] += 1;
+                currentComparisonIndex++;
+                if (currentComparisonIndex >= comparisons.length) {
+                    showResults();
+                } else {
+                    showComparison();
                 }
             }
-
-            if (items.length < 2) {
-                alert('Please enter at least two items.');
-                return;
-            }
-
-            comparisons = generateComparisons(items);
-            currentComparisonIndex = 0;
-            document.getElementById('input-section').style.display = 'none';
-            document.getElementById('comparison-section').style.display = 'block';
-            showComparison();
         }
 
         function generateComparisons(items) {
@@ -117,32 +209,42 @@
         }
 
         function showComparison() {
-            if (currentComparisonIndex >= comparisons.length) {
-                showResults();
-                return;
-            }
-
             const [item1, item2] = comparisons[currentComparisonIndex];
-            document.getElementById('item1').innerText = item1;
-            document.getElementById('item2').innerText = item2;
+            renderComparison(item1, item2);
+            updateCounter();
         }
 
-        document.getElementById('choose1').addEventListener('click', () => chooseItem(1));
-        document.getElementById('choose2').addEventListener('click', () => chooseItem(2));
+        function renderComparison(item1, item2) {
+            comparisonSection.style.display = 'flex';
+            const item1Div = document.getElementById('item1');
+            const item2Div = document.getElementById('item2');
+            item1Div.innerHTML = '';
+            item2Div.innerHTML = '';
 
-        function chooseItem(choice) {
-            const [item1, item2] = comparisons[currentComparisonIndex];
-            if (choice === 1) {
-                scores[item1]++;
-            } else {
-                scores[item2]++;
+            if (item1.name) {
+                item1Div.innerText = item1.name;
+            } else if (item1.image) {
+                const img1 = document.createElement('img');
+                img1.src = URL.createObjectURL(item1.image);
+                item1Div.appendChild(img1);
             }
-            currentComparisonIndex++;
-            showComparison();
+
+            if (item2.name) {
+                item2Div.innerText = item2.name;
+            } else if (item2.image) {
+                const img2 = document.createElement('img');
+                img2.src = URL.createObjectURL(item2.image);
+                item2Div.appendChild(img2);
+            }
+        }
+
+        function updateCounter() {
+            counter.innerText = `Comparisons left: ${comparisons.length - currentComparisonIndex}`;
         }
 
         function showResults() {
-            document.getElementById('comparison-section').style.display = 'none';
+            comparisonSection.style.display = 'none';
+            resultsSection.style.display = 'block';
             const resultsList = document.getElementById('results-list');
             resultsList.innerHTML = '';
             Object.keys(scores).sort((a, b) => scores[b] - scores[a]).forEach(item => {
@@ -150,8 +252,14 @@
                 li.innerText = `${item}: ${scores[item]} points`;
                 resultsList.appendChild(li);
             });
-            document.getElementById('results-section').style.display = 'block';
         }
+
+        document.getElementById('back-btn').addEventListener('click', () => {
+            comparisonSection.style.display = 'none';
+            resultsSection.style.display = 'none';
+            itemContainer.style.display = 'flex';
+        });
+
     </script>
 </body>
 </html>
