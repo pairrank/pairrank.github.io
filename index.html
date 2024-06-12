@@ -1,1 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PairRank</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #333;
+            color: #fff;
+        }
 
+        h1 {
+            font-size: 36px;
+            margin-bottom: 30px;
+        }
+
+        .item {
+            margin: 20px;
+            display: inline-block;
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            border: 1px solid #555;
+            background-color: #444;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: #555;
+            color: #fff;
+        }
+
+        button:hover {
+            background-color: #777;
+        }
+
+        #results-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #results-list li {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>PairRank</h1>
+    <div id="input-section">
+        <input type="number" id="item-count" placeholder="Number of items">
+        <button id="start-btn">Start</button>
+    </div>
+    <div id="comparison-section" style="display:none;">
+        <div id="item1" class="item"></div>
+        <div id="item2" class="item"></div>
+        <button id="choose1">Choose Item 1</button>
+        <button id="choose2">Choose Item 2</button>
+    </div>
+    <div id="results-section" style="display:none;">
+        <h2>Results</h2>
+        <ul id="results-list"></ul>
+    </div>
+    <script>
+        document.getElementById('start-btn').addEventListener('click', startComparison);
+
+        let items = [];
+        let comparisons = [];
+        let scores = {};
+        let currentComparisonIndex = 0;
+
+        function startComparison() {
+            const itemCount = parseInt(document.getElementById('item-count').value);
+            if (isNaN(itemCount) || itemCount <= 0) {
+                alert('Please enter a valid number of items.');
+                return;
+            }
+
+            items = [];
+            for (let i = 0; i < itemCount; i++) {
+                const itemName = prompt(`Enter name for item ${i + 1}:`);
+                if (itemName) {
+                    items.push(itemName);
+                    scores[itemName] = 0;
+                }
+            }
+
+            if (items.length < 2) {
+                alert('Please enter at least two items.');
+                return;
+            }
+
+            comparisons = generateComparisons(items);
+            currentComparisonIndex = 0;
+            document.getElementById('input-section').style.display = 'none';
+            document.getElementById('comparison-section').style.display = 'block';
+            showComparison();
+        }
+
+        function generateComparisons(items) {
+            let pairs = [];
+            for (let i = 0; i < items.length; i++) {
+                for (let j = i + 1; j < items.length; j++) {
+                    pairs.push([items[i], items[j]]);
+                }
+            }
+            return pairs.sort(() => Math.random() - 0.5);
+        }
+
+        function showComparison() {
+            if (currentComparisonIndex >= comparisons.length) {
+                showResults();
+                return;
+            }
+
+            const [item1, item2] = comparisons[currentComparisonIndex];
+            document.getElementById('item1').innerText = item1;
+            document.getElementById('item2').innerText = item2;
+        }
+
+        document.getElementById('choose1').addEventListener('click', () => chooseItem(1));
+        document.getElementById('choose2').addEventListener('click', () => chooseItem(2));
+
+        function chooseItem(choice) {
+            const [item1, item2] = comparisons[currentComparisonIndex];
+            if (choice === 1) {
+                scores[item1]++;
+            } else {
+                scores[item2]++;
+            }
+            currentComparisonIndex++;
+            showComparison();
+        }
+
+        function showResults() {
+            document.getElementById('comparison-section').style.display = 'none';
+            const resultsList = document.getElementById('results-list');
+            resultsList.innerHTML = '';
+            Object.keys(scores).sort((a, b) => scores[b] - scores[a]).forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = `${item}: ${scores[item]} points`;
+                resultsList.appendChild(li);
+            });
+            document.getElementById('results-section').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
