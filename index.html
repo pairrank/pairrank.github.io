@@ -15,6 +15,23 @@
             overflow-y: auto; 
         }
 
+        body::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        body::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        
+        body::-webkit-scrollbar-thumb {
+            background:  #323232; 
+            border-radius: 10px; /* Adjust as needed */
+        }
+        
+        body::-webkit-scrollbar-thumb:hover {
+            background: 3e3e3e; 
+        }
+
         h1 {
             font-size: 130px; 
             margin-bottom: 30px;
@@ -148,14 +165,14 @@
 
         .comparison-item {
             margin: 20px;
-            width: 900px; 
-            height: 900px;
+            width: 550px; 
+            height: 550px;
             border-radius: 15px;
             background-color: #323232;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 108px; 
+            font-size: 66px; 
             cursor: pointer;
         }
 
