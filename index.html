@@ -11,12 +11,12 @@
             margin: 0;
             padding: 20px;
             color: #fff;
-            overflow-x: hidden; /* Prevent horizontal scrolling */
-            overflow-y: auto; /* Prevent vertical scrolling */
+            overflow-x: hidden; 
+            overflow-y: auto; 
         }
 
         h1 {
-            font-size: 130px; /* Larger PairRank text */
+            font-size: 130px; 
             margin-bottom: 30px;
             margin-top: 30px;
         }
@@ -57,9 +57,9 @@
 
         button {
             margin: 20px;
-            padding: 20px 40px; /* Larger button size */
-            font-size: 24px; /* Larger button text */
-            border-radius: 10px; /* More rounded button */
+            padding: 20px 40px; 
+            font-size: 24px; 
+            border-radius: 10px; 
             border: none;
             background-color: #323232;
             color: #fff;
@@ -75,8 +75,8 @@
             top: 40%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #1e1e1e; /* Opaque dark background */
-            padding: 15px; /* Larger popup */
+            background: #1e1e1e; 
+            padding: 15px; 
             border-radius: 10px;
             z-index: 1000;
             display: none;
@@ -89,32 +89,32 @@
         }
 
         .popup input[type="text"] {
-            padding: 30px 10px; /* Larger input */
-            margin: 8px; /* Larger margin */
+            padding: 30px 10px; 
+            margin: 8px; 
             border-radius: 5px;
             border: none;
-            background-color: #FFF; /* White text input */
+            background-color: #FFF; 
             color: #FFF;
-            width: 400px; /* Wider input */
+            width: 400px; 
             text-align: center;
-            font-size: 25px; /* Add this line */
+            font-size: 25px; 
         }
 
         .popup input[type="file"] {
-            padding: 30px 10px; /* Larger input */
-            margin: 8px; /* Larger margin */
+            padding: 30px 10px; 
+            margin: 8px; 
             border-radius: 5px;
             border: none;
-            background-color: #777; /* Grey out image input */
+            background-color: #777; 
             color: #777;
             width: 400px;
             text-align: center;
-            font-size: 20px; /* Add this line */
+            font-size: 20px; 
         }
 
         .popup button {
-            padding: 15px 30px; /* Larger button */
-            border-radius: 10px; /* More rounded button */
+            padding: 15px 30px; 
+            border-radius: 10px; 
             margin: 8px;
             border: none;
             background-color: #323232;
@@ -131,7 +131,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* Prevent scrolling */
+            overflow: hidden; 
         }
 
         #counter {
@@ -143,19 +143,19 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 30px;
-            flex-grow: 1; /* Center items vertically */
+            flex-grow: 1; 
         }
 
         .comparison-item {
             margin: 20px;
-            width: 900px; /* Much bigger items */
+            width: 900px; 
             height: 900px;
             border-radius: 15px;
             background-color: #323232;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 108px; /* Larger text in comparison items */
+            font-size: 108px; 
             cursor: pointer;
         }
 
@@ -167,7 +167,7 @@
 
         #results-page {
             display: none;
-            overflow-y: auto; /* This will enable vertical scrolling when necessary */
+            overflow-y: auto; 
         }
 
         #results-text {
@@ -183,7 +183,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 10px auto; /* Change this to auto */
+            margin: 10px auto; 
             padding: 10px;
             border-radius: 15px;
             background-color: #1e1e1e;
@@ -204,9 +204,9 @@
 
         #back-btn {
             margin-top: 20px;
-            padding: 20px 40px; /* Larger button */
-            font-size: 24px; /* Larger text */
-            border-radius: 10px; /* More rounded button */
+            padding: 20px 40px; 
+            font-size: 24px; 
+            border-radius: 10px; 
         }
     </style>
 </head>
@@ -263,26 +263,22 @@
         const itemNameInput = document.getElementById('item-name');
         const itemImageInput = document.getElementById('item-image');
 
-        // Darken the background
         document.body.style.backgroundColor = '#111';
 
-        // Clicking outside the popup should close it
         window.addEventListener('click', (event) => {
             if (event.target !== addItemBtn && !popup.contains(event.target)) {
                 popup.style.display = 'none';
-                itemNameInput.value = ''; // Clear text input
-                itemImageInput.value = ''; // Clear file input
-                toggleInputOptions(); // Reset input options
+                itemNameInput.value = ''; 
+                itemImageInput.value = ''; 
+                toggleInputOptions(); 
             }
         });
 
-        // Add item button functionality
         addItemBtn.addEventListener('click', () => {
             popup.style.display = 'block';
-            toggleInputOptions(); // Initialize input options
+            toggleInputOptions(); 
         });
 
-        // Toggle input options based on text or image selection
         function toggleInputOptions() {
             if (itemNameInput.value.trim()) {
                 itemImageInput.disabled = true;
@@ -302,7 +298,6 @@
         itemNameInput.addEventListener('input', toggleInputOptions);
         itemImageInput.addEventListener('input', toggleInputOptions);
 
-        // Add item to the list
         addPopupBtn.addEventListener('click', () => {
             const itemName = itemNameInput.value.trim();
             const itemImage = itemImageInput.files[0];
@@ -343,7 +338,6 @@
             });
         }
 
-        // Start comparisons button functionality
         startBtn.addEventListener('click', () => {
             comparisons = generateComparisons(items);
             currentComparisonIndex = 0;
@@ -352,7 +346,6 @@
             document.getElementById('comparison-page').style.display = 'block';
         });
 
-        // Generate comparisons function
         function generateComparisons(items) {
             let pairs = [];
             for (let i = 0; i < items.length; i++) {
@@ -361,7 +354,6 @@
                 }
             }
 
-            // Randomly flip pairs with 50% probability
             for (let i = 0; i < pairs.length; i++) {
                 if (Math.random() < 0.5) {
                     let pair = pairs[i];
@@ -372,14 +364,13 @@
             return pairs.sort(() => Math.random() - 0.5);
         }
 
-        // Render comparison function
         function renderComparison() {
             const [item1, item2] = comparisons[currentComparisonIndex];
             const item1Div = document.getElementById('item1');
             const item2Div = document.getElementById('item2');
 
-            item1Div.innerHTML = ''; // Clear previous content
-            item2Div.innerHTML = ''; // Clear previous content
+            item1Div.innerHTML = ''; 
+            item2Div.innerHTML = ''; 
 
             if (item1.name) {
                 item1Div.innerText = item1.name;
@@ -401,21 +392,17 @@
                 item2Div.appendChild(img2);
             }
 
-            // Update counter with current comparison index
             counter.innerText = `${currentComparisonIndex + 1}/${comparisons.length}`;
         }
 
-        // Select item function
         function selectItem(index) {
             const currentComparison = comparisons[currentComparisonIndex];
             const selectedItem = currentComparison[index];
 
-            // Increment score for the chosen item
             scores[selectedItem.name || selectedItem.image.name] = (scores[selectedItem.name || selectedItem.image.name] || 0) + 1;
 
             currentComparisonIndex++;
 
-            // Check if all comparisons are done, then show results
             if (currentComparisonIndex >= comparisons.length) {
                 showResults();
             } else {
@@ -423,15 +410,12 @@
             }
         }
 
-        // Show results function
         function showResults() {
             document.getElementById('comparison-page').style.display = 'none';
             document.getElementById('results-page').style.display = 'block';
 
-            // Clear previous results
             resultsList.innerHTML = '';
 
-            // Ensure all items are in the scores object
             items.forEach(item => {
                 const itemName = item.name || (item.image && item.image.name);
                 if (!scores.hasOwnProperty(itemName)) {
@@ -439,10 +423,8 @@
                 }
             });
 
-            // Sort items based on scores
             const sortedItems = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
 
-            // Display results in a list
             sortedItems.forEach(itemKey => {
                 const li = document.createElement('li');
                 li.classList.add('result-item');
@@ -482,15 +464,14 @@
             });
         }
 
-        // Back to main page button in results
         backBtn.addEventListener('click', () => {
-            // Reset everything and go back to main item adding page
+
             items = [];
             comparisons = [];
             scores = {};
             currentComparisonIndex = 0;
             renderItems();
-            startBtn.style.display = 'none'; // Hide start button
+            startBtn.style.display = 'none'; 
             document.getElementById('results-page').style.display = 'none';
             document.getElementById('item-add-page').style.display = 'block';
         });
